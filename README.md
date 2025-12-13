@@ -54,6 +54,15 @@ After connecting your Github repository to Cloudflare Workers, you can select th
 pnpm run build:opennextjs
 ```
 
+### Deploy command
+
+```bash
+pnpm run deploy:opennextjs
+```
+
+<img width="1141" height="288" alt="Build and deploy command settings in Cloudflare Workers" src="https://github.com/user-attachments/assets/1559d59b-54d2-417e-be61-567d704ced02" />
+
+
 ### Variables and Secrets
 
 ```bash
@@ -61,8 +70,8 @@ DATABASE_URI # Neon Postgres database URI
 PAYLOAD_SECRET # Payload secret
 BETTER_AUTH_SECRET # Better Auth secret
 ```
-<img width="1141" height="315" alt="Variables and secrets setting in Cloudflare Workers" src="https://github.com/user-attachments/assets/18cddf3f-4d2f-43d6-9663-5e99a7fd1218" />
 
+<img width="1141" height="315" alt="Variables and secrets settings in Cloudflare Workers" src="https://github.com/user-attachments/assets/18cddf3f-4d2f-43d6-9663-5e99a7fd1218" />
 
 Make sure you set `keep_vars = true` in your `wrangler.toml` file to ensure the environment variables and secrets won't be lost after you deploy from wrangler CLI.
 
