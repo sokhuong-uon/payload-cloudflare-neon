@@ -4,8 +4,8 @@ import { betterAuthOptions } from '@/features/auth/better-auth-options'
 export const betterAuthPluginOptions = {
   disabled: false,
   debug: {
-    logTables: true,
-    enableDebugLogs: true,
+    logTables: false,
+    enableDebugLogs: false,
   },
 
   disableDefaultPayloadAuth: true,
