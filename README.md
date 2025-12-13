@@ -61,3 +61,80 @@ DATABASE_URI # Neon Postgres database URI
 PAYLOAD_SECRET # Payload secret
 BETTER_AUTH_SECRET # Better Auth secret
 ```
+
+# Important Notes
+
+## Next config
+
+You must add `pg-cloudflare` to the `serverExternalPackages` in your `next.config.mjs` file to ensure we have the correct variant of the `pg` package for Cloudflare Workers.
+
+```ts
+import { withPayload } from '@payloadcms/next/withPayload'
+
+/** @type {import('next').NextConfig} */
+const nextConfig = {
+  webpack: (webpackConfig) => {
+    webpackConfig.resolve.extensionAlias = {
+      '.cjs': ['.cts', '.cjs'],
+      '.js': ['.ts', '.tsx', '.js', '.jsx'],
+      '.mjs': ['.mts', '.mjs'],
+    }
+
+    return webpackConfig
+  },
+  serverExternalPackages: ['pg-cloudflare'],
+}
+
+export default withPayload(nextConfig, { devBundleServerPackages: false })
+
+import { initOpenNextCloudflareForDev } from '@opennextjs/cloudflare'
+initOpenNextCloudflareForDev()
+```
+
+## Postgres adapter config in `payload.config.ts`
+
+You must set `maxUses` to `1` so connection is not reused between requests.
+
+```ts
+import { postgresAdapter } from '@payloadcms/db-postgres'
+import { betterAuthPlugin } from 'payload-auth'
+import path from 'path'
+import { buildConfig } from 'payload'
+import { fileURLToPath } from 'url'
+
+import { Users } from '@/collections/users'
+import { Todos } from '@/collections/todos'
+import { betterAuthPluginOptions } from '@/features/auth/better-auth-plugin-options'
+
+const filename = fileURLToPath(import.meta.url)
+const dirname = path.dirname(filename)
+
+export default buildConfig({
+  admin: {
+    user: Users.slug,
+    importMap: {
+      baseDir: path.resolve(dirname),
+    },
+  },
+  collections: [Users, Todos],
+  secret: process.env.PAYLOAD_SECRET,
+  typescript: {
+    outputFile: path.resolve(dirname, 'payload-types.ts'),
+  },
+  db: postgresAdapter({
+    idType: 'uuid',
+    pool: {
+      connectionString: process.env.DATABASE_URI,
+      maxUses: 1,
+    },
+    push: false,
+  }),
+  plugins: [betterAuthPlugin(betterAuthPluginOptions)],
+})
+```
+
+Only use `push: true` or omit it entirely if you're sure that you're not using proudction database.
+
+## Performance
+
+Consider [Hyperdrive](https://developers.cloudflare.com/hyperdrive) for performance optimizations.
