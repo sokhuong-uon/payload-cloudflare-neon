@@ -1,4 +1,4 @@
-name = "payload-cloudflare-neon"
+name = "payload-better-auth-cloudflare-neon"
 main = ".open-next/worker.js"
 compatibility_date = "2025-10-25"
 compatibility_flags = ["nodejs_compat", "global_fetch_strictly_public"]
