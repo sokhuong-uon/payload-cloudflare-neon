@@ -27,6 +27,7 @@ export default buildConfig({
     idType: 'uuid',
     pool: {
       connectionString: process.env.DATABASE_URI,
+      maxUses: 1,
     },
     push: false,
   }),
