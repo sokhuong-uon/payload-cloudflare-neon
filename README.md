@@ -1,67 +1,63 @@
-# Payload Blank Template
+# Payload Better Auth Cloudflare Neon
 
-This template comes configured with the bare minimum to get started on anything you need.
+This repo is a working example of how to use [Payload](https://payloadcms.com/) with [Better Auth](https://better-auth.com/) via [Payload Auth](https://github.com/payload-auth/payload-auth) for authentication, [Neon Postgres](https://neon.com) for the database, and [Cloudflare Workers](https://www.cloudflare.com/developer-platform/products/workers/) for the hosting.
 
-## Quick start
+Note: You need to have a paid Cloudflare account ($5/month) to deploy this project to production. However, you can run a local preview however you like.
 
-This template can be deployed directly from our Cloud hosting and it will setup MongoDB and cloud S3 object storage for media.
+You need to have a [Neon Postgres database](https://neon.com) to use this project.
 
-## Quick Start - local setup
+# Development
 
-To spin up this template locally, follow these steps:
+## 1. Install Dependencies
 
-### Clone
+```bash
+pnpm install
+```
 
-After you click the `Deploy` button above, you'll want to have standalone copy of this repo on your machine. If you've already cloned this repo, skip to [Development](#development).
+### 1.1 Environment variables
 
-### Development
+```bash
+cp .env.example .env
+```
 
-1. First [clone the repo](#clone) if you have not done so already
-2. `cd my-project && cp .env.example .env` to copy the example environment variables. You'll need to add the `MONGODB_URI` from your Cloud project to your `.env` if you want to use S3 storage and the MongoDB database that was created for you.
+Then fill in the the correct values for your environment.
 
-3. `pnpm install && pnpm dev` to install dependencies and start the dev server
-4. open `http://localhost:3000` to open the app in your browser
+```bash
+DATABASE_URI='postgresql://neon-db-user:neon-db-password@neon-db-host/neondb?sslmode=require&channel_binding=require'
 
-That's it! Changes made in `./src` will be reflected in your app. Follow the on-screen instructions to login and create your first admin user. Then check out [Production](#production) once you're ready to build and serve your app, and [Deployment](#deployment) when you're ready to go live.
+PAYLOAD_SECRET='you may generate using openssl rand -hex 16'
 
-#### Docker (Optional)
+BETTER_AUTH_SECRET='you may generate using openssl rand -base64 32'
+```
 
-If you prefer to use Docker for local development instead of a local MongoDB instance, the provided docker-compose.yml file can be used.
+## 2. Run the Development Server
 
-To do so, follow these steps:
+```bash
+pnpm dev
+```
 
-- Modify the `MONGODB_URI` in your `.env` file to `mongodb://127.0.0.1/<dbname>`
-- Modify the `docker-compose.yml` file's `MONGODB_URI` to match the above `<dbname>`
-- Run `docker-compose up` to start the database, optionally pass `-d` to run in the background.
+## 3. Run local preview
 
-## How it works
+```bash
+pnpm preview
+```
 
-The Payload config is tailored specifically to the needs of most websites. It is pre-configured in the following ways:
+# Deployment
 
-### Collections
+## 1. Deploy to Cloudflare Workers via Github integration
 
-See the [Collections](https://payloadcms.com/docs/configuration/collections) docs for details on how to extend this functionality.
+After connecting your Github repository to Cloudflare Workers, you can select the project for deployment on Cloudflare Dashboard.
 
-- #### Users (Authentication)
+### Build command
 
-  Users are auth-enabled collections that have access to the admin panel.
+```
+pnpm run build:opennextjs
+```
 
-  For additional help, see the official [Auth Example](https://github.com/payloadcms/payload/tree/main/examples/auth) or the [Authentication](https://payloadcms.com/docs/authentication/overview#authentication-overview) docs.
+### Variables and Secrets
 
-- #### Media
-
-  This is the uploads enabled collection. It features pre-configured sizes, focal point and manual resizing to help you manage your pictures.
-
-### Docker
-
-Alternatively, you can use [Docker](https://www.docker.com) to spin up this template locally. To do so, follow these steps:
-
-1. Follow [steps 1 and 2 from above](#development), the docker-compose file will automatically use the `.env` file in your project root
-1. Next run `docker-compose up`
-1. Follow [steps 4 and 5 from above](#development) to login and create your first admin user
-
-That's it! The Docker instance will help you get up and running quickly while also standardizing the development environment across your teams.
-
-## Questions
-
-If you have any issues or questions, reach out to us on [Discord](https://discord.com/invite/payload) or start a [GitHub discussion](https://github.com/payloadcms/payload/discussions).
+```bash
+DATABASE_URI # Neon Postgres database URI
+PAYLOAD_SECRET # Payload secret
+BETTER_AUTH_SECRET # Better Auth secret
+```
