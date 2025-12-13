@@ -1,6 +1,12 @@
 # Payload Better Auth Cloudflare Neon
 
-This repo is a working example of how to use [Payload](https://payloadcms.com/) with [Better Auth](https://better-auth.com/) via [Payload Auth](https://github.com/payload-auth/payload-auth) for authentication, [Neon Postgres](https://neon.com) for the database, and [Cloudflare Workers](https://www.cloudflare.com/developer-platform/products/workers/) for the hosting.
+This repo is a working example of how to use:
+
+- [Payload](https://payloadcms.com/) with
+- [Better Auth](https://better-auth.com/) via
+- [Payload Auth](https://github.com/payload-auth/payload-auth) for authentication,
+- [Neon Postgres](https://neon.com) for the database, and
+- [Cloudflare Workers](https://www.cloudflare.com/developer-platform/products/workers/) for deployment.
 
 Note: You need to have a paid Cloudflare account ($5/month) to deploy this project to production. However, you can run a local preview however you like.
 
@@ -62,7 +68,6 @@ pnpm run deploy:opennextjs
 
 <img width="1141" height="288" alt="Build and deploy command settings in Cloudflare Workers" src="https://github.com/user-attachments/assets/1559d59b-54d2-417e-be61-567d704ced02" />
 
-
 ### Variables and Secrets
 
 ```bash
@@ -119,9 +124,12 @@ import { initOpenNextCloudflareForDev } from '@opennextjs/cloudflare'
 initOpenNextCloudflareForDev()
 ```
 
+Read more about [`serverExternalPackages`](https://nextjs.org/docs/app/api-reference/config/next-config-js/serverExternalPackages) in the Next.js documentation.
+
 ## Postgres adapter config in `payload.config.ts`
 
 You must set `maxUses` to `1` so connection is not reused between requests.
+Read more about disabling connection pooling in the [Cloudflare blog post](https://blog.cloudflare.com/payload-cms-workers/#database).
 
 ```ts
 import { postgresAdapter } from '@payloadcms/db-postgres'
@@ -133,9 +141,19 @@ import { fileURLToPath } from 'url'
 import { Users } from '@/collections/users'
 import { Todos } from '@/collections/todos'
 import { betterAuthPluginOptions } from '@/features/auth/better-auth-plugin-options'
+import { CloudflareContext, getCloudflareContext } from '@opennextjs/cloudflare'
+import { GetPlatformProxyOptions } from 'wrangler'
 
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
+
+const isCLI = process.argv.some((value) => value.match(/^(generate|migrate):?/))
+const isProduction = process.env.NODE_ENV === 'production'
+
+const cloudflare =
+  isCLI || !isProduction
+    ? await getCloudflareContextFromWrangler()
+    : await getCloudflareContext({ async: true })
 
 export default buildConfig({
   admin: {
@@ -152,17 +170,23 @@ export default buildConfig({
   db: postgresAdapter({
     idType: 'uuid',
     pool: {
-      connectionString: process.env.DATABASE_URI,
+      connectionString: cloudflare.env.HYPERDRIVE.connectionString,
       maxUses: 1,
     },
     push: false,
   }),
   plugins: [betterAuthPlugin(betterAuthPluginOptions)],
 })
+
+async function getCloudflareContextFromWrangler(): Promise<CloudflareContext> {
+  return import(/* webpackIgnore: true */ `${'__wrangler'.replaceAll('_', '')}`).then(
+    ({ getPlatformProxy }) =>
+      getPlatformProxy({
+        environment: process.env.CLOUDFLARE_ENV || '',
+        remoteBindings: isProduction,
+      } satisfies GetPlatformProxyOptions),
+  )
+}
 ```
 
 Only use `push: true` or omit it entirely if you're sure that you're not using proudction database.
-
-## Performance
-
-Consider [Hyperdrive](https://developers.cloudflare.com/hyperdrive) for performance optimizations.
