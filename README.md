@@ -62,6 +62,23 @@ PAYLOAD_SECRET # Payload secret
 BETTER_AUTH_SECRET # Better Auth secret
 ```
 
+Make sure you set `keep_vars = true` in your `wrangler.toml` file to ensure the environment variables and secrets won't be lost after you deploy from wrangler CLI.
+
+```toml
+name = "payload-better-auth-cloudflare-neon"
+main = ".open-next/worker.js"
+compatibility_date = "2025-10-25"
+compatibility_flags = ["nodejs_compat", "global_fetch_strictly_public"]
+keep_vars = true
+
+[observability]
+enabled = true
+
+[assets]
+binding = "ASSETS"
+directory = ".open-next/assets"
+```
+
 # Important Notes
 
 ## Next config
