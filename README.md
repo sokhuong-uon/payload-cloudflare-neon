@@ -29,7 +29,7 @@ cp .env.example .env
 Then fill in the the correct values for your environment.
 
 ```bash
-DATABASE_URI='postgresql://neon-db-user:neon-db-password@neon-db-host/neondb?sslmode=require&channel_binding=require'
+DATABASE_URI='postgresql://neon-db-user:neon-db-password@neon-db-host/neondb'
 
 PAYLOAD_SECRET='you may generate using openssl rand -hex 16'
 
